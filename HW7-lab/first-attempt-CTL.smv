@@ -1,0 +1,48 @@
+-- safety: only one process is in its critical section
+-- liveness: whenever any process requests to enter its
+--          critical section, it will eventually be
+--          permitted to do so.
+-- non-blocking: a process can always request to enter
+--          its critical section.
+-- no strict sequencing: processes need not enter their
+--          critical section in strict sequence
+
+MODULE prc(other-st)
+    VAR
+        st : {n, t, c};
+        -- n: in its non-critical state
+        -- t: trying to enter its critical state
+        -- c: in its critical state
+    ASSIGN
+        init(st) := n;
+        next(st) :=
+            case
+                (st = n) : {t,n};
+                (st = t) & (other-st != c) : c;
+                (st = c) : {c,n};
+                -- other process may starve, so add FAIRNESS constraint
+                -- default:
+                TRUE : st;
+            esac;
+    FAIRNESS running
+    FAIRNESS !(st = c)
+
+MODULE main
+    VAR
+        pr1 : process prc(pr2.st);
+        pr2 : process prc(pr1.st);
+        -- there are 2 processes defined by above module prc()
+    -- safety
+    LTLSPEC G!((pr1.st = c) & (pr2.st = c))
+    -- liveness
+    LTLSPEC G((pr1.st = t) -> F(pr1.st = c))
+    LTLSPEC G((pr2.st = t) -> F(pr2.st = c))
+    -- non-blocking
+    CTLSPEC AG((pr1.st = n) -> EX(pr1.st = t))
+    CTLSPEC AG((pr2.st = n) -> EX(pr2.st = t))
+    -- no strict sequencing
+    -- CTLSPEC EG!((pr1.st = c) -> (pr1.st = c)U(!(pr1.st = c) & !(pr1.st = c)U(pr2.st = c)))
+    -- above CTLSPEC is wrong
+    -- use the following instead:
+    CTLSPEC EG((pr1.st = c) -> E[!(pr1.st = c)U(pr1.st = c)])
+    CTLSPEC EG((pr2.st = c) -> E[!(pr2.st = c)U(pr2.st = c)])
