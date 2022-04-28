@@ -9,14 +9,19 @@ def n_queen_solve(n):
     diag_c = [ If(i == j, True ,
             And(i+Q[i]!=j+Q[j], i+Q[j]!=j+Q[i]))
             for i in range(n) for j in range(i) ]
-    solve(val_c + col_c + diag_c)
+    start_time = time.time() # start
+    s = Solver()
+    s.add(val_c); s.add(col_c); s.add(diag_c)
+    if s.check() != sat:
+        print("unsatisfiable")
+    else: # is sat
+        for i in range(n):
+            print("Q[{}]: {}".format(i+1, s.model()[Q[i]]))
+    print("--- %s seconds ---" % (time.time() - start_time)) # end
+
 
 # handle input and count time
 if __name__=="__main__":
     str = input("Enter the size of the problem: ")
     problem_size = int(str)
-    start_time = time.time() # start
     n_queen_solve(problem_size)
-    print("--- %s seconds ---" % (time.time() - start_time)) # end
-
-# n_queen_solve(9)
