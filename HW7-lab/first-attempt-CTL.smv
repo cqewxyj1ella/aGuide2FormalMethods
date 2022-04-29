@@ -44,5 +44,5 @@ MODULE main
     -- CTLSPEC EG!((pr1.st = c) -> (pr1.st = c)U(!(pr1.st = c) & !(pr1.st = c)U(pr2.st = c)))
     -- above CTLSPEC is wrong
     -- use the following instead:
-    CTLSPEC EG((pr1.st = c) -> E[!(pr1.st = c)U(pr1.st = c)])
-    CTLSPEC EG((pr2.st = c) -> E[!(pr2.st = c)U(pr2.st = c)])
+    CTLSPEC EG((pr1.st = c) -> E[(!(pr1.st = c) & !(pr2.st = c))U(pr1.st = c)])
+    CTLSPEC EG((pr2.st = c) -> E[(!(pr1.st = c) & !(pr2.st = c))U(pr2.st = c)])
